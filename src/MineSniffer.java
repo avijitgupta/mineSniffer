@@ -13,7 +13,6 @@ public class MineSniffer {
 	private static final int FIND = -2;
 	private static final int UNKNOWN = -1;
 	private static KnowledgeBase kb;
-	private static PLResolution plr = new PLResolution();
 	private static Queue<String> processedAndUnknown;
 	private static Queue<String> process;
 	private static Queue<String> mines;
@@ -64,9 +63,9 @@ public class MineSniffer {
 				String query = "M"+rowmajor;
 				process.remove();
 				//System.out.print("Resolution started found");
-				boolean foundMine = plr.plResolution(kb, query);// Is there a mine at i,j
+				//boolean foundMine = plr.plResolution(kb, query);// Is there a mine at i,j
 				//System.out.print("Resolution ended found");
-				
+				boolean foundMine = kb.askWithDpll(query);// Is there a mine at i,j
 				if(foundMine){
 					mines.add(rowmajor);
 					if(!kb.contains(query)){
@@ -84,14 +83,14 @@ public class MineSniffer {
 				query = "( NOT M" + rowmajor+" )";// Is a mine absent at i,j
 				//System.out.print("Resolution started absent");
 				
-				boolean mineAbsent = plr.plResolution(kb, query);// Is there no mine at i,j
+				boolean mineAbsent = kb.askWithDpll(query);// Is there no mine at i,j
 				//System.out.print("Resolution ended absent");
 				
 				if(mineAbsent){
 					noMines.add(rowmajor);
 					kb.tell(query); // Hey KB, there is no mine at this position
 					newRuleAdded = true;
-					System.out.print(" added " + query);
+					//System.out.print(" added " + query);
 					continue;
 				}
 				
@@ -273,16 +272,19 @@ public class MineSniffer {
 			noMines = new LinkedList<String>();
 
 			//displayBoard();
+			long startTime = System.currentTimeMillis();
 			addNoMineLocationKnowledge();
 			addNeighborKnowledge();
 			findMines();
+			long endTime = System.currentTimeMillis();
 			System.out.print("Unknown (?):  ");
 			displayQueue(processedAndUnknown);
 			System.out.print("Mines (X):  ");
 			displayQueue(mines);
 			System.out.print("No Mines:  ");
 			displayQueue(noMines);
-			
+		    System.out.println("Time: " + (endTime - startTime) + "  milliSeconds");
+
 	}
 
 }

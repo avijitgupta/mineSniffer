@@ -6,16 +6,6 @@ import java.util.Queue;
 import java.util.StringTokenizer;
 import aima.core.logic.propositional.algorithms.KnowledgeBase;
 import aima.core.logic.propositional.algorithms.PLResolution;
-class pair
-{
-	int x;
-	int y;
-	public pair(int x, int y)
-	{
-		this.x  = x;
-		this.y  = y;
-	}
-}
 
 public class MineSniffer {
 	private static int N, M;

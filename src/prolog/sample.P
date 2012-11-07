@@ -90,6 +90,7 @@ findNeighbours((InX, InY), [(X,Y)|T], [H|NeighTail]):-
 	findNeighbours((InX, InY), T, NeighTail),
 	!.
 
+
 % ignore a neighbor which does not satisfy the condition
 findNeighbours((InX, InY), [_|T], NeighTail):-
 	findNeighbours((InX, InY), T, NeighTail).
@@ -109,3 +110,82 @@ placeMine(XY):-
 	retract(boardCopy(XY,#)),
 	asserta(boardCopy(XY,*)).
 
+printSolution(M, N, A):-
+	findSolution(X),
+	mergeLists(X, M), %mines
+	getClearList(X, C),
+	mergeLists(C, N), %no mines
+        getUnknownCoordinatesList(Unknown),
+        getComplementedList(Unknown, N, Comp1),
+        getComplementedList(Comp1, M, A). %ambiguous
+
+
+printMines(M):-
+	findSolution(X),
+	mergeLists(X, M).
+
+printClear(L):-
+	findSolution(X),
+	getClearList(X, C),
+	mergeLists(C, L).
+
+printAmbiguous(L):-
+	findSolution(X),
+        getClearList(X, C),
+        mergeLists(C, N),
+	mergeLists(X, M),
+	getUnknownCoordinatesList(Unknown),
+	getComplementedList(Unknown, N, Comp1),
+	getComplementedList(Comp1, M, L). 
+
+
+getClearList([], []).
+
+getClearList([H|T], [R|ResTail]):-
+	getUnknownCoordinatesList(Unknown),
+	getComplementedList(Unknown, H, R),
+	getClearList(T, ResTail).
+
+getComplementedList([], _, []).
+
+getComplementedList([Head|T], H, [Res|ResTail]):-
+	nonMember(Head, H),
+	Res = Head,
+	getComplementedList(T, H, ResTail),
+	!.
+
+getComplementedList([_|T], H, R):-
+	getComplementedList(T, H, R).
+
+getCommonElements([], _, []).
+
+getCommonElements([H|T], Second, [R|ResTail]):-
+	member(H, Second),
+	R = H,
+	getCommonElements(T, Second, ResTail),
+	!.
+
+getCommonElements([_|T], Second, ResTail):-
+	getCommonElements(T, Second, ResTail).
+
+mergeLists([First|T1], Result):-
+	mergeWithList(T1, First, Result).
+
+mergeWithList([],Previous,Result):-
+	Result = Previous.
+
+mergeWithList([Top|T1], First, Result):-
+	getCommonElements(Top, First, Common),
+	mergeWithList(T1, Common, Result).
+
+nonMember(Head, H):-
+(
+	member(Head, H) -> fail ;
+	true
+),
+!.
+
+member(X, [X|_]).        % member(X, [Head|Tail]) is true if X = Head 
+                         % that is, if X is the head of the list
+member(X, [_|Tail]) :-   % or if X is a member of Tail,
+  member(X, Tail).       % ie. if member(X, Tail) is true.

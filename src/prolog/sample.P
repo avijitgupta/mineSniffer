@@ -1,0 +1,111 @@
+subset([], []).
+subset([E|Tail], [E|NTail]):-
+  subset(Tail, NTail).
+subset([_|Tail], NTail):-
+  subset(Tail, NTail).
+
+listSubsets(Input, X):-
+	findall(Y, subset(Input, Y), X).
+
+integerField(XY):- board(XY, X), integer(X).
+unknownField(XY):- board(XY, #).
+nohintField(XY):-  board(XY, @).
+
+getAllBoardCoordinates(X):-
+	findall(XY, board(XY, _), X).
+
+getNumericCoordinates(H):-
+	integerField(H).
+
+getNumericCoordinatesList(X):-
+	findall(Y, getNumericCoordinates(Y),X).
+
+getUnknownCoordinates(X):-
+	unknownField(X).
+
+getUnknownCoordinatesList(X):-
+	findall(Y, getUnknownCoordinates(Y), X).
+
+createUnsolvedSubsets(L):-
+	getUnknownCoordinatesList(Unknown),
+	listSubsets(Unknown, L).
+
+findSolution(L):-
+	createUnsolvedSubsets(Unsolved),
+	findValidSubset(Unsolved, L).
+
+findValidSubset([], []).
+
+findValidSubset([H|T], [R|ResultTail]):-
+	getAllBoardCoordinates(BoardCoordinates),
+	replenishBoard(BoardCoordinates),
+	putConstraints(H),
+	getNumericCoordinatesList(NumericCoordinates),
+	checkBoardConstraints(NumericCoordinates),
+	R = H,
+	findValidSubset(T, ResultTail),
+	!.
+
+findValidSubset([_|T], ResultTail):-
+	findValidSubset(T, ResultTail).
+
+replenishBoard([]).
+
+replenishBoard([H|T]):-
+	board(H, Value),
+	retract(boardCopy(H, _)),
+	asserta(boardCopy(H, Value)),
+	replenishBoard(T).
+
+putConstraints([]).
+
+putConstraints([H|T]):-
+	placeMine(H),
+	putConstraints(T).
+
+checkBoardConstraints([]).
+
+checkBoardConstraints([H|T]):-
+	boardCopy(H, Value),
+	Value =:= 0,
+	checkBoardConstraints(T).
+
+neighDistance([(1,1), (1,0), (1,-1), (0,1), (0,-1), (-1,1), (-1,0), (-1,-1)]).
+
+getNeighbours(XY, Neighbours):-
+	neighDistance(XYDiffList),
+	findNeighbours(XY, XYDiffList, Neighbours).
+
+%base condition for termination
+findNeighbours(_,[],[]).
+
+%append the neighbor to the list if consitions satisfied
+findNeighbours((InX, InY), [(X,Y)|T], [H|NeighTail]):-
+	NewX is InX - X,
+	NewY is InY - Y,
+	NewX > 0,
+	NewY > 0,
+	H = (NewX, NewY),
+	integerField(H),   %ensures only coordinates that contain numbers are put into this.
+	findNeighbours((InX, InY), T, NeighTail),
+	!.
+
+% ignore a neighbor which does not satisfy the condition
+findNeighbours((InX, InY), [_|T], NeighTail):-
+	findNeighbours((InX, InY), T, NeighTail).
+
+decrementList([]).
+
+decrementList([XY|T]):-
+	boardCopy(XY,Value),
+	DecValue is Value - 1,
+	retract(boardCopy(XY, Value)),
+	asserta(boardCopy(XY, DecValue)),
+	decrementList(T).
+	
+placeMine(XY):-
+	getNeighbours(XY, Neighbours),
+	decrementList(Neighbours),
+	retract(boardCopy(XY,#)),
+	asserta(boardCopy(XY,*)).
+

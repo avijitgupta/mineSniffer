@@ -1,0 +1,110 @@
+//Assignment Test case 1
+
+assert( board((3,1),1)).
+assert( boardCopy((3,1),1)).
+assert( board((3,2),2)).
+assert( boardCopy((3,2),2)).
+assert( board((3,3),2)).
+assert( boardCopy((3,3),2)).
+assert( board((3,4),1)).
+assert( boardCopy((3,4),1)).
+assert( board((3,5),@)).
+assert( boardCopy((3,5),@)).
+assert( board((2,1),1)).
+assert( boardCopy((2,1),1)).
+assert( board((2,2),#)).
+assert( boardCopy((2,2),#)).
+assert( board((2,3),#)).
+assert( boardCopy((2,3),#)).
+assert( board((2,4),1)).
+assert( boardCopy((2,4),1)).
+assert( board((2,5),@)).
+assert( boardCopy((2,5),@)).
+assert( board((1,1),1)).
+assert( boardCopy((1,1),1)).
+assert( board((1,2),2)).
+assert( boardCopy((1,2),2)).
+assert( board((1,3),2)).
+assert( boardCopy((1,3),2)).
+assert( board((1,4),1)).
+assert( boardCopy((1,4),1)).
+assert( board((1,5),@)).
+assert( boardCopy((1,5),@)).
+
+//Blackboard test case 1
+
+assert( board((3,1),1)).
+assert( boardCopy((3,1),1)).
+assert( board((3,2),#)).
+assert( boardCopy((3,2),#)).
+assert( board((3,3),#)).
+assert( boardCopy((3,3),#)).
+assert( board((2,1),1)).
+assert( boardCopy((2,1),1)).
+assert( board((2,2),2)).
+assert( boardCopy((2,2),2)).
+assert( board((2,3),#)).
+assert( boardCopy((2,3),#)).
+assert( board((1,1),0)).
+assert( boardCopy((1,1),0)).
+assert( board((1,2),1)).
+assert( boardCopy((1,2),1)).
+assert( board((1,3),1)).
+assert( boardCopy((1,3),1)).
+
+//Black board test case 2
+
+assert( board((3,1),1)).
+assert( boardCopy((3,1),1)).
+assert( board((3,2),2)).
+assert( boardCopy((3,2),2)).
+assert( board((3,3),1)).
+assert( boardCopy((3,3),1)).
+assert( board((2,1),#)).
+assert( boardCopy((2,1),#)).
+assert( board((2,2),2)).
+assert( boardCopy((2,2),2)).
+assert( board((2,3),#)).
+assert( boardCopy((2,3),#)).
+assert( board((1,1),1)).
+assert( boardCopy((1,1),1)).
+assert( board((1,2),2)).
+assert( boardCopy((1,2),2)).
+assert( board((1,3),1)).
+assert( boardCopy((1,3),1)).
+
+//My sample test case
+
+assert( board((3,1),#)).
+assert( boardCopy((3,1),#)).
+assert( board((3,2),#)).
+assert( boardCopy((3,2),#)).
+assert( board((3,3),2)).
+assert( boardCopy((3,3),2)).
+assert( board((3,4),1)).
+assert( boardCopy((3,4),1)).
+assert( board((3,5),@)).
+assert( boardCopy((3,5),@)).
+assert( board((2,1),#)).
+assert( boardCopy((2,1),#)).
+assert( board((2,2),4)).
+assert( boardCopy((2,2),4)).
+assert( board((2,3),#)).
+assert( boardCopy((2,3),#)).
+assert( board((2,4),1)).
+assert( boardCopy((2,4),1)).
+assert( board((2,5),@)).
+assert( boardCopy((2,5),@)).
+assert( board((1,1),2)).
+assert( boardCopy((1,1),2)).
+assert( board((1,2),#)).
+assert( boardCopy((1,2),#)).
+assert( board((1,3),2)).
+assert( boardCopy((1,3),2)).
+assert( board((1,4),1)).
+assert( boardCopy((1,4),1)).
+assert( board((1,5),@)).
+assert( boardCopy((1,5),@)).
+
+
+

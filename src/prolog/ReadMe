@@ -1,0 +1,49 @@
+How To Execute Prolog code
+--------------------------
+
+assert the board coordinates. You can generate the assertions for any given input file using the java program MineSnifferPrologInterface.java. Test 
+assertions are given in the file named 'assertions' in the same directory as this program.
+
+$>javac MineSnifferPrologInterface.java
+$> java MineSnifferPrologInterface /path/to/input/file
+
+Run xsb:
+
+$>/path/to/xsb/bin/xsb
+| ?- 
+
+Copy the assertions and place it into the xsb engine (testcase 2 given below):
+NOTE: While generating assertions, we replace NH with @ and X with #
+
+assert( board((3,1),1)).
+assert( boardCopy((3,1),1)).
+assert( board((3,2),2)).
+assert( boardCopy((3,2),2)).
+assert( board((3,3),1)).
+assert( boardCopy((3,3),1)).
+assert( board((2,1),#)).
+assert( boardCopy((2,1),#)).
+assert( board((2,2),2)).
+assert( boardCopy((2,2),2)).
+assert( board((2,3),#)).
+assert( boardCopy((2,3),#)).
+assert( board((1,1),1)).
+assert( boardCopy((1,1),1)).
+assert( board((1,2),2)).
+assert( boardCopy((1,2),2)).
+assert( board((1,3),1)).
+assert( boardCopy((1,3),1)).
+
+consult the prolog file:
+consult('mineSniffer.P').
+
+run printSolution:
+
+printSolution(M,N,A).
+
+This will return in form of lists
+M = Mined Locations
+N = No Mine Locations
+A = Ambiguous locations
+
+

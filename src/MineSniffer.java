@@ -20,7 +20,9 @@ public class MineSniffer {
 	/**
 	 * @param args
 	 */
-	
+	/**
+	 * Displays the board
+	 */
 	public static void displayBoard(){
 		for(int i = 0 ; i < N ; i ++){
 			for(int j = 0 ; j < M ; j ++){
@@ -30,6 +32,9 @@ public class MineSniffer {
 		}
 	}
 	
+	/**
+	 * Adds the knowledge of locations that dont contain any mines
+	 */
 	public static void addNoMineLocationKnowledge(){
 		for(int i = 0 ; i < N ; i ++){
 			for(int j = 0; j < M ; j ++){
@@ -41,6 +46,17 @@ public class MineSniffer {
 		}
 	}
 	
+	/**
+	 * For any number i in the board, we chose exactly i mined cells out of n Xs present in the neighboring
+	 * cells. For example, if there are 3 Xs (say A, B, C) present and the number 2 is written in the cell, 
+	 * we generate the following clauses
+	 * 
+	 * M(A) AND M(B) AND NOT M(C)
+	 * M(A) AND M(C) AND NOT M(B)
+	 * M(B) AND M(B) AND NOT M(A)
+	 * 
+	 * We add these to knowledge base
+	 */
 	public static void addNeighborKnowledge(){
 		for(int i = 0 ; i < N ; i ++){
 			for(int j = 0; j < M ; j ++){
@@ -48,12 +64,15 @@ public class MineSniffer {
 					ArrayList<String> neigh = getXNeighbors(i,j);
 					String clauses = getClausalKnowledge(neigh, board[i][j]);
 					kb.tell(clauses);
-					//System.out.println(clauses);
 				}
 			}
 		}
 	}
 	
+	/**
+	 * Main method that does the inference from knowledge base. If any new information is inferrend, such as
+	 * the presence of mine, the KB is updated accordingly 
+	 */
 	public static void findMines(){
 		boolean newRuleAdded = false;
 		do{
@@ -62,35 +81,26 @@ public class MineSniffer {
 				String rowmajor = process.peek();
 				String query = "M"+rowmajor;
 				process.remove();
-				//System.out.print("Resolution started found");
-				//boolean foundMine = plr.plResolution(kb, query);// Is there a mine at i,j
-				//System.out.print("Resolution ended found");
 				boolean foundMine = kb.askWithDpll(query);// Is there a mine at i,j
 				if(foundMine){
 					mines.add(rowmajor);
-					if(!kb.contains(query)){
-						kb.tell(query); // Hey KB, I found a mine. Please add
-						while(!processedAndUnknown.isEmpty()){
-							process.add(processedAndUnknown.peek()); //Check the new status of mines, given new addition
-							processedAndUnknown.remove();
-						}
-						//System.out.print(" added " + query);
+					kb.tell(query); // KB, I found a mine. Please add
+					while(!processedAndUnknown.isEmpty()){
+						process.add(processedAndUnknown.peek()); //Check the new status of mines, given new addition
+						processedAndUnknown.remove();
 					}
 					newRuleAdded = true;
 					continue;
 				}
 				
 				query = "( NOT M" + rowmajor+" )";// Is a mine absent at i,j
-				//System.out.print("Resolution started absent");
 				
 				boolean mineAbsent = kb.askWithDpll(query);// Is there no mine at i,j
-				//System.out.print("Resolution ended absent");
 				
 				if(mineAbsent){
 					noMines.add(rowmajor);
-					kb.tell(query); // Hey KB, there is no mine at this position
+					kb.tell(query); // KB, there is no mine at this position
 					newRuleAdded = true;
-					//System.out.print(" added " + query);
 					continue;
 				}
 				
@@ -106,6 +116,12 @@ public class MineSniffer {
 		}while(newRuleAdded);
 	}
 	
+	/**
+	 * gets neighbors which are Xs around a cell
+	 * @param r
+	 * @param c
+	 * @return
+	 */
 	public static ArrayList<String> getXNeighbors(int r, int c){
 		ArrayList<String> neigh = new ArrayList<String>();
 		if(r-1 >= 0){
@@ -159,7 +175,6 @@ public class MineSniffer {
 		if(clauses.size() ==0) return "";
 		
 		for(int i = 0 ; i < clauses.size(); i++){
-			//System.out.println(clauses.get(i));
 			if(result.length() == 0){
 				result+=" ( " + clauses.get(i);
 			}
@@ -169,10 +184,19 @@ public class MineSniffer {
 			}
 		}
 		result+=" )";
-		//System.out.println(result);
 		return result;
 	}
 	
+	/**
+	 * Generates neighbors choosing k out of n neighbors as positive propositions and n-k negative propositions
+	 * @param n
+	 * @param k
+	 * @param index
+	 * @param neigh
+	 * @param used
+	 * @param clauses
+	 * @param level
+	 */
 	public static void nCk(int n, int k, int index, ArrayList<String>neigh, boolean used[],ArrayList<String> clauses, int level ){
 		if(index >n)return;
 		
@@ -208,6 +232,10 @@ public class MineSniffer {
 		}
 	}
 	
+	/**
+	 * Debugging helper
+	 * @param q
+	 */
 	public static void displayQueue(Queue<String> q){
 		if(q.isEmpty()){
 			System.out.print("None");
@@ -234,6 +262,11 @@ public class MineSniffer {
 		return ""+rowmajor;
 	}
 	
+	/**
+	 * Main
+	 * @param args
+	 * @throws Exception
+	 */
 	public static void main(String[] args) throws Exception {
 			if(args.length!=1)  {
 		      System.err.println("usage: MineSniffer <filePath> ");
@@ -271,7 +304,6 @@ public class MineSniffer {
 			mines = new LinkedList<String>();
 			noMines = new LinkedList<String>();
 
-			//displayBoard();
 			long startTime = System.currentTimeMillis();
 			addNoMineLocationKnowledge();
 			addNeighborKnowledge();

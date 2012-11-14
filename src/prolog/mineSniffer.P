@@ -1,41 +1,53 @@
+%%generates subsets
 subset([], []).
 subset([E|Tail], [E|NTail]):-
   subset(Tail, NTail).
 subset([_|Tail], NTail):-
   subset(Tail, NTail).
 
+%%returns a list of all subsets
 listSubsets(Input, X):-
 	findall(Y, subset(Input, Y), X).
 
+%%check if a field is an integer field, unknown field(X) or No Hint field (NH)
 integerField(XY):- board(XY, X), integer(X).
 unknownField(XY):- board(XY, #).
 nohintField(XY):-  board(XY, @).
 
+%%gets the coordinates of board that have been asserted
 getAllBoardCoordinates(X):-
 	findall(XY, board(XY, _), X).
 
+%%gets coordinates of board that have numbers in them
 getNumericCoordinates(H):-
 	integerField(H).
 
+%%gets a list of numeric coordinates
 getNumericCoordinatesList(X):-
 	findall(Y, getNumericCoordinates(Y),X).
 
+%%gets coordinates that contain Xs
 getUnknownCoordinates(X):-
 	unknownField(X).
 
+%%gets a list of all coordinates that contain Xs
 getUnknownCoordinatesList(X):-
 	findall(Y, getUnknownCoordinates(Y), X).
 
+%%creates subset of coordinates that contain Xs
 createUnsolvedSubsets(L):-
 	getUnknownCoordinatesList(Unknown),
 	listSubsets(Unknown, L).
 
+%%creates a subset of mines and validates the board
 findSolution(L):-
 	createUnsolvedSubsets(Unsolved),
 	findValidSubset(Unsolved, L).
 
+%%base case
 findValidSubset([], []).
 
+%%applies a subset of mines onto the board and checks if all the constraints are satisfied (if all numeric values are 0s)
 findValidSubset([H|T], [R|ResultTail]):-
 	getAllBoardCoordinates(BoardCoordinates),
 	replenishBoard(BoardCoordinates),
@@ -46,9 +58,11 @@ findValidSubset([H|T], [R|ResultTail]):-
 	findValidSubset(T, ResultTail),
 	!.
 
+%%invoked when any condition of the above function fail. The entry of the subset is ignored in that case
 findValidSubset([_|T], ResultTail):-
 	findValidSubset(T, ResultTail).
 
+%%refreshes the entire boardCopy
 replenishBoard([]).
 
 replenishBoard([H|T]):-
@@ -57,12 +71,15 @@ replenishBoard([H|T]):-
 	asserta(boardCopy(H, Value)),
 	replenishBoard(T).
 
+%%base case
 putConstraints([]).
 
+%%applies constraints by placing mine at positions and decrementing the value in neighbours
 putConstraints([H|T]):-
 	placeMine(H),
 	putConstraints(T).
 
+%%checks for all numeric values to be true
 checkBoardConstraints([]).
 
 checkBoardConstraints([H|T]):-
@@ -70,16 +87,18 @@ checkBoardConstraints([H|T]):-
 	Value =:= 0,
 	checkBoardConstraints(T).
 
+%%the distance list of neighbours we consider. We take the cells at a distance of 1
 neighDistance([(1,1), (1,0), (1,-1), (0,1), (0,-1), (-1,1), (-1,0), (-1,-1)]).
 
+%%gets a list of neighbours using the list above
 getNeighbours(XY, Neighbours):-
 	neighDistance(XYDiffList),
 	findNeighbours(XY, XYDiffList, Neighbours).
 
-%base condition for termination
+%%base condition for termination
 findNeighbours(_,[],[]).
 
-%append the neighbor to the list if consitions satisfied
+%%append the neighbor to the list if consitions satisfied
 findNeighbours((InX, InY), [(X,Y)|T], [H|NeighTail]):-
 	NewX is InX - X,
 	NewY is InY - Y,
@@ -91,12 +110,14 @@ findNeighbours((InX, InY), [(X,Y)|T], [H|NeighTail]):-
 	!.
 
 
-% ignore a neighbor which does not satisfy the condition
+%% ignore a neighbor which does not satisfy the condition
 findNeighbours((InX, InY), [_|T], NeighTail):-
 	findNeighbours((InX, InY), T, NeighTail).
 
+%%base consition
 decrementList([]).
 
+%%decrements entire list by 1
 decrementList([XY|T]):-
 	boardCopy(XY,Value),
 	DecValue is Value - 1,
@@ -104,12 +125,14 @@ decrementList([XY|T]):-
 	asserta(boardCopy(XY, DecValue)),
 	decrementList(T).
 	
+%%places mine at a location given by XY. this decrements the numeric values of the neighours
 placeMine(XY):-
 	getNeighbours(XY, Neighbours),
 	decrementList(Neighbours),
 	retract(boardCopy(XY,#)),
 	asserta(boardCopy(XY,*)).
 
+%%The main function which acts as an interface to print out all solutions
 printSolution(M, N, A):-
 	findSolution(X),
 	mergeLists(X, M), %mines
@@ -119,16 +142,18 @@ printSolution(M, N, A):-
         getComplementedList(Unknown, N, Comp1),
         getComplementedList(Comp1, M, A). %ambiguous
 
-
+%%prints all the mined coordinates
 printMines(M):-
 	findSolution(X),
 	mergeLists(X, M).
 
+%%prints all the clear coordinates
 printClear(L):-
 	findSolution(X),
 	getClearList(X, C),
 	mergeLists(C, L).
 
+%%prints all the ambiguous coordinates
 printAmbiguous(L):-
 	findSolution(X),
         getClearList(X, C),
@@ -139,13 +164,16 @@ printAmbiguous(L):-
 	getComplementedList(Comp1, M, L). 
 
 
+%%base case
 getClearList([], []).
 
+%%gets a list of clear positions
 getClearList([H|T], [R|ResTail]):-
 	getUnknownCoordinatesList(Unknown),
 	getComplementedList(Unknown, H, R),
 	getClearList(T, ResTail).
 
+%%gets the elements which are not a member of a particular list H in form of a list 
 getComplementedList([], _, []).
 
 getComplementedList([Head|T], H, [Res|ResTail]):-
@@ -157,6 +185,8 @@ getComplementedList([Head|T], H, [Res|ResTail]):-
 getComplementedList([_|T], H, R):-
 	getComplementedList(T, H, R).
 
+
+%%given two lists, finds the common elements in the two lists
 getCommonElements([], _, []).
 
 getCommonElements([H|T], Second, [R|ResTail]):-
@@ -165,9 +195,11 @@ getCommonElements([H|T], Second, [R|ResTail]):-
 	getCommonElements(T, Second, ResTail),
 	!.
 
+%%called when above condition fails
 getCommonElements([_|T], Second, ResTail):-
 	getCommonElements(T, Second, ResTail).
 
+%%the following merge* functions help us in merging all the lists within a list, and produce a list of elements that are common to all lists
 mergeLists([First|T1], Result):-
 	mergeWithList(T1, First, Result).
 
@@ -178,6 +210,7 @@ mergeWithList([Top|T1], First, Result):-
 	getCommonElements(Top, First, Common),
 	mergeWithList(T1, Common, Result).
 
+%%finding non member of a list
 nonMember(Head, H):-
 (
 	member(Head, H) -> fail ;
@@ -185,6 +218,7 @@ nonMember(Head, H):-
 ),
 !.
 
+%% standard prolog methods for finding a member function
 member(X, [X|_]).        % member(X, [Head|Tail]) is true if X = Head 
                          % that is, if X is the head of the list
 member(X, [_|Tail]) :-   % or if X is a member of Tail,
